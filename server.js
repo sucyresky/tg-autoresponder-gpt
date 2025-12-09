@@ -1,13 +1,17 @@
 import express from "express";
 import bodyParser from "body-parser";
 import fs from "fs";
+import fetch from "node-fetch"; // PENTING untuk mengatasi 502
 
 const app = express();
 app.use(bodyParser.json());
 
+app.get("/", (req, res) => {
+  res.send("Server OK");
+});
+
 const HISTORY_FILE = "history.json";
 
-// Muat history lama
 let history = fs.existsSync(HISTORY_FILE)
   ? JSON.parse(fs.readFileSync(HISTORY_FILE))
   : {};
@@ -37,7 +41,6 @@ async function askGPT(message, userId) {
   const data = await res.json();
   const aiText = data.choices[0].message.content;
 
-  // simpan history → hanya simpan 40 pesan terakhir
   history[userId] = [
     ...messages,
     { role: "assistant", content: aiText }
